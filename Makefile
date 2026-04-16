@@ -31,4 +31,8 @@ win:
 network:
 	@docker network create poker-network
 
+# vstup do dockeru
+bash:
+	@docker-compose exec backend bash
+
 
