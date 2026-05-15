@@ -4,6 +4,7 @@ services:
   database:
     image: postgres:18-alpine
     environment:
+      TZ: Europe/Prague
       POSTGRES_DB: ${POSTGRES_DB}
       # You should definitely change the password in production
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -16,6 +17,21 @@ services:
       - database_data:/var/lib/postgresql/data:rw
       # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
       # - ./docker/db/data:/var/lib/postgresql/data:rw
+  database-test:
+    image: postgres:18-alpine
+    environment:
+      TZ: Europe/Prague
+      POSTGRES_DB: ${POSTGRES_DB_TEST}
+      # You should definitely change the password in production
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_TEST}
+      POSTGRES_USER: ${POSTGRES_USER_TEST}
+    ports:
+      - "54024:5432"
+    networks:
+      - poker-network      
+    volumes:
+      - database_data_test:/var/lib/postgresql/data:rw
+
 ###< doctrine/doctrine-bundle ###
   backend:
     build: .
@@ -26,11 +42,12 @@ services:
       - /app/var # Anonymní volume - cache a logy zůstanou v rychlé paměti Dockeru
     #  - /app/vendor # Volitelně: vendor je taky obrovský, tohle ho zrychlí
     environment:
-      DATABASE_URL: "postgresql://app:!ChangeMe!@database:5432/app?serverVersion=18&charset=utf8"
+      TZ: Europe/Prague
     networks:
       - poker-network
     depends_on:
       - database
+      - database-test
     command: php -S 0.0.0.0:8000 -t public
 networks:
   poker-network:
@@ -39,4 +56,5 @@ networks:
 volumes:
 ###> doctrine/doctrine-bundle ###
   database_data:
+  database_data_test:
 ###< doctrine/doctrine-bundle ###
