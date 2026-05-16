@@ -74,6 +74,7 @@ migrate-down:
 migrate-down-test:
 	@docker exec -it $(DOCKER_NAME) php bin/console doctrine:migrations:migrate prev --env=test
 
+# spuštění testů => nutno spouštět v dockeru
 .PHONY: unit
 unit:
 	@php bin/phpunit

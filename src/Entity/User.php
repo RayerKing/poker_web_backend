@@ -12,12 +12,14 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Constraints\Sequentially;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_NICKNAME', fields: ['nickname'])]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
-#[UniqueEntity(fields: ["nickname", "email"])]
+#[UniqueEntity(fields: ['nickname'], message: 'not_unique_nickname')]
+#[UniqueEntity(fields: ['email'], message: 'not_unique_email')]
 #[ORM\HasLifecycleCallbacks]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -27,8 +29,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
-    #[Assert\NotBlank(message: "missing_nickname")]
-    #[Assert\Length(min: 4, max: 180, minMessage: "low_length_nickname", maxMessage: "high_length_nickname")]
+    #[Assert\Sequentially([
+        new Assert\NotBlank(message: "missing_nickname"),
+        new Assert\Length(min: 4, max: 180, minMessage: "low_length_nickname", maxMessage: "high_length_nickname"),
+    ])]
     private ?string $nickname = null;
 
     /**
@@ -41,9 +45,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column]
-    #[Assert\NotBlank(message: "missing_password")]
-    #[Assert\Length(min:8, minMessage: "password_short")]
-    #[Assert\PasswordStrength(minScore: 2, message: "password_weak")]
+    #[Sequentially([
+        new Assert\NotBlank(message: "missing_password"),
+        new Assert\Length(min:8, minMessage: "password_short"),
+        new Assert\PasswordStrength(minScore: 2, message: "password_weak"),
+        ]
+    )]
     private ?string $password = null;
 
     #[ORM\Column(length: 255, nullable: true, unique: true)]
@@ -299,7 +306,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->created_at = new DateTimeImmutable();
         $this->updated_at = new DateTimeImmutable();
 
-        $this->roles = ['BASIC'];
+        $this->roles = ['ROLE_USER'];
         $this->is_aktivni = true;
         $this->is_deleted = false;
         $this->is_demo = false;

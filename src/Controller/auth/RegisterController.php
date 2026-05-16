@@ -23,15 +23,25 @@ class RegisterController extends AbstractController
         ): JsonResponse
     {
         $type = $request->getContentTypeFormat();
+        
+        $error = [];
 
         if ($type !== 'json') {
-            return $this->vratResponse(false, 'invalid type format', Response::HTTP_UNSUPPORTED_MEDIA_TYPE);
+            $error[] = [
+                'property' => 'format',
+                'message' => 'invalid type format'
+            ];
+            return $this->vratResponse(false, $error, Response::HTTP_UNSUPPORTED_MEDIA_TYPE);
         }
 
         $data = $request->toArray();
 
         if ($data['password'] !== $data['password_repeat']) {
-            return $this->vratResponse(false, 'password no match', Response::HTTP_UNPROCESSABLE_ENTITY);
+            $error[] = [
+                'property' => 'password',
+                'message' => 'password_no_match'
+            ];
+            return $this->vratResponse(false, $error, Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $user = new User();
@@ -46,7 +56,11 @@ class RegisterController extends AbstractController
             $vystup = [];
     
             foreach ($errors as $error) {
-            $vystup[$error->getPropertyPath()] = $error->getMessage();
+                $strukturaChyby = [
+                    'property' => $error->getPropertyPath(),
+                    'message' => $error->getMessage()
+                ];
+                $vystup[] = $strukturaChyby;
             }
 
             return $this->vratResponse(false, $vystup, Response::HTTP_UNPROCESSABLE_ENTITY);
