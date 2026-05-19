@@ -35,11 +35,9 @@ services:
 ###< doctrine/doctrine-bundle ###
   backend:
     build: .
-    ports:
-      - "8000:8000"
     volumes:
       - .:/var/www/html
-      - /app/var # Anonymní volume - cache a logy zůstanou v rychlé paměti Dockeru
+      - /var/www/html/var # Anonymní volume - cache a logy zůstanou v rychlé paměti Dockeru
     #  - /app/vendor # Volitelně: vendor je taky obrovský, tohle ho zrychlí
     environment:
       TZ: Europe/Prague
@@ -48,7 +46,17 @@ services:
     depends_on:
       - database
       - database-test
-    command: php -S 0.0.0.0:8000 -t public
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/html # Nginx potřebuje přístup k public/index.php
+      - ./default.conf:/etc/nginx/conf.d/default.conf # Naše konfigurace
+    networks:
+      - poker-network
+    depends_on:
+      - backend
 networks:
   poker-network:
     external: true

@@ -19,4 +19,6 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
+RUN mkdir -p var && chown -R www-data:www-data var
+
 EXPOSE 8000
