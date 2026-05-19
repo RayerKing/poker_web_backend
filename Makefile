@@ -79,9 +79,4 @@ migrate-down-test:
 unit:
 	@php bin/phpunit
 
-# otevření logů v dockeru backend
-.PHONY: logs
-logs:
-	@docker compose logs -f backend
-
 
