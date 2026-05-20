@@ -14,7 +14,7 @@ services:
     networks:
       - poker-network      
     volumes:
-      - database_data:/var/lib/postgresql/data:rw
+      - database_data:/var/lib/postgresql/:rw
       # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
       # - ./docker/db/data:/var/lib/postgresql/data:rw
   database-test:
@@ -30,7 +30,7 @@ services:
     networks:
       - poker-network      
     volumes:
-      - database_data_test:/var/lib/postgresql/data:rw
+      - database_data_test:/var/lib/postgresql/:rw
 
 ###< doctrine/doctrine-bundle ###
   backend:
