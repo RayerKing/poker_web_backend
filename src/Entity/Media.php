@@ -15,45 +15,45 @@ class Media
 
     #[ORM\ManyToOne(inversedBy: 'media')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $user_id = null;
+    private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'media')]
-    private ?Tournament $tournament_id = null;
+    private ?Tournament $tournament = null;
 
     #[ORM\Column(length: 255)]
     private ?string $path = null;
 
     #[ORM\Column]
-    private ?float $filesize = null;
+    private ?int $filesize = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $media_type = null;
+    private ?string $mediaType = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getUserId(): ?User
+    public function getUser(): ?User
     {
-        return $this->user_id;
+        return $this->user;
     }
 
-    public function setUserId(?User $user_id): static
+    public function setUser(?User $user): static
     {
-        $this->user_id = $user_id;
+        $this->user = $user;
 
         return $this;
     }
 
-    public function getTournamentId(): ?Tournament
+    public function getTournament(): ?Tournament
     {
-        return $this->tournament_id;
+        return $this->tournament;
     }
 
-    public function setTournamentId(?Tournament $tournament_id): static
+    public function setTournament(?Tournament $tournament): static
     {
-        $this->tournament_id = $tournament_id;
+        $this->tournament = $tournament;
 
         return $this;
     }
@@ -70,12 +70,12 @@ class Media
         return $this;
     }
 
-    public function getFilesize(): ?float
+    public function getFilesize(): ?int
     {
         return $this->filesize;
     }
 
-    public function setFilesize(float $filesize): static
+    public function setFilesize(int $filesize): static
     {
         $this->filesize = $filesize;
 
@@ -84,12 +84,12 @@ class Media
 
     public function getMediaType(): ?string
     {
-        return $this->media_type;
+        return $this->mediaType;
     }
 
-    public function setMediaType(string $media_type): static
+    public function setMediaType(string $mediaType): static
     {
-        $this->media_type = $media_type;
+        $this->mediaType = $mediaType;
 
         return $this;
     }

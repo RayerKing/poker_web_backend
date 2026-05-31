@@ -60,8 +60,7 @@ class RegistrationControllerTest extends WebTestCase
         $this->assertJson($responseContent);
         
         $responseData = json_decode($responseContent, true);
-        $this->assertTrue($responseData['success']);
-        $this->assertEquals('success', $responseData['message']);
+        $this->assertEquals(Response::HTTP_CREATED, $responseData['status']);
     }
 
     /**
@@ -84,7 +83,6 @@ class RegistrationControllerTest extends WebTestCase
             );
 
         $response = $client->getResponse()->getContent();
-       // $this->assertEquals('ahoj', $response);
         $this->assertJson($response);
 
         $responseData = json_decode($response, true);
@@ -92,20 +90,18 @@ class RegistrationControllerTest extends WebTestCase
         $container = static::getContainer();
 
         $userRepository = $container->get(\App\Repository\UserRepository::class);
-
         if ($status !== 'exists') {
             
-            if (count($responseData['message']) !== 1) {
+            if (count($responseData['errors']) !== 1) {
                 $this->fail('Během testu se spustilo více chyb, nebo žádná!');
             }
 
-            foreach ($responseData['message'] as $error) {
+            foreach ($responseData['errors'] as $error) {
                 if ($error['property'] == 'nickname') {
                 $errorMessage = $error['message'];
                 }
             }
 
-            $this->assertFalse($responseData['success']);
             $this->assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
 
             if ($status == 'missing') { 
@@ -124,7 +120,6 @@ class RegistrationControllerTest extends WebTestCase
             
         } else {
             $this->assertResponseIsSuccessful('Uživatel nebyl zaregistrován.');
-
             $user = $userRepository->findOneBy(['email' => $data['email']]);
 
             $this->assertNotNull($user, 'Uživatel je null!');
@@ -145,8 +140,6 @@ class RegistrationControllerTest extends WebTestCase
 
             $responseData = json_decode($response, true);
 
-            $this->assertFalse($responseData['success']);
-
             $this->assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
 
             $users = $userRepository->findBy(['nickname' => $data['nickname']]);
@@ -158,11 +151,11 @@ class RegistrationControllerTest extends WebTestCase
             $errorMessageEmail = $message[0];
             $errorMessageNickname = $message[1];
             
-            if (count($responseData['message']) !== 2) {
+            if (count($responseData['errors']) !== 2) {
                 $this->fail('Při kontrole existence vzniklo více, nebo méně chyb!');
             }
 
-            foreach ($responseData['message'] as $error) {
+            foreach ($responseData['errors'] as $error) {
                 if ($error['property'] == 'nickname') {
                     $this->assertEquals($errorMessageNickname, $error['message']);
                 } elseif ($error['property'] == 'email') {
@@ -261,12 +254,11 @@ class RegistrationControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
 
         $responseData = json_decode($response, true);
-
-        if (count($responseData['message']) !== 1) {
+        if (count($responseData['errors']) !== 1) {
             $this->fail('Je více, nebo žádná chyba!');
         }
         
-        $this->assertEquals('invalid_email', $responseData['message'][0]['message']);
+        $this->assertEquals('invalid_email', $responseData['errors'][0]['message']);
 
         $container = static::getContainer();
 
@@ -308,11 +300,11 @@ class RegistrationControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
         
-        if (count($responseData['message']) !== 1) {
+        if (count($responseData['errors']) !== 1) {
             $this->fail('Počet chyb je větší nebo žádná.');
         }
 
-        $this->assertEquals($message, $responseData['message'][0]['message']);
+        $this->assertEquals($message, $responseData['errors'][0]['message']);
 
         $container = static::getContainer();
 
@@ -340,6 +332,16 @@ class RegistrationControllerTest extends WebTestCase
                     'password_repeat' => ''
                 ],
                 'message' => 'missing_password'
+            ],
+            'missing_one' => [
+                'status' => 'missing',
+                'data' => [
+                    'nickname' => 'pepan',
+                    'email' => 'pepa@test.cz',
+                    'password' => '',
+                    'password_repeat' => 'Kombajnsdgdsfgdsfg'
+                ],
+                'message' => 'password_no_match'
             ],
             'short' => [
                 'status' => 'short',
@@ -398,11 +400,11 @@ class RegistrationControllerTest extends WebTestCase
 
         $responseData = json_decode($response, true);
 
-        if (count($responseData['message']) !== 1) {
+        if (count($responseData['errors']) !== 1) {
             $this->fail('Počet chyb je větší, nebo 0');
         }
-
-        $this->assertEquals('password_no_match', $responseData['message'][0]['message']);
+        
+        $this->assertEquals('password_no_match', $responseData['errors'][0]['message']);
 
         $container = static::getContainer();
 

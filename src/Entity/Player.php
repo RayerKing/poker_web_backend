@@ -15,14 +15,14 @@ class Player
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(inversedBy: 'player', cascade: ['persist', 'remove'])]
-    private ?User $user_id = null;
+    #[ORM\OneToOne(inversedBy: 'player')]
+    private ?User $user = null;
 
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
     #[ORM\Column]
-    private ?bool $is_guest = null;
+    private ?bool $isGuest = null;
 
     #[ORM\Column(nullable: true)]
     private ?int $rating = null;
@@ -31,9 +31,9 @@ class Player
     private ?string $motto = null;
 
     /**
-     * @var Collection<int, Participants>
+     * @var Collection<int, Participant>
      */
-    #[ORM\OneToMany(targetEntity: Participants::class, mappedBy: 'player_id', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Participant::class, mappedBy: 'player', orphanRemoval: true)]
     private Collection $participants;
 
     public function __construct()
@@ -46,14 +46,14 @@ class Player
         return $this->id;
     }
 
-    public function getUserId(): ?User
+    public function getUser(): ?User
     {
-        return $this->user_id;
+        return $this->user;
     }
 
-    public function setUserId(?User $user_id): static
+    public function setUser(?User $user): static
     {
-        $this->user_id = $user_id;
+        $this->user = $user;
 
         return $this;
     }
@@ -72,12 +72,12 @@ class Player
 
     public function isGuest(): ?bool
     {
-        return $this->is_guest;
+        return $this->isGuest;
     }
 
-    public function setIsGuest(bool $is_guest): static
+    public function setGuest(bool $guest): static
     {
-        $this->is_guest = $is_guest;
+        $this->isGuest = $guest;
 
         return $this;
     }
@@ -107,29 +107,29 @@ class Player
     }
 
     /**
-     * @return Collection<int, Participants>
+     * @return Collection<int, Participant>
      */
     public function getParticipants(): Collection
     {
         return $this->participants;
     }
 
-    public function addParticipant(Participants $participant): static
+    public function addParticipant(Participant $participant): static
     {
         if (!$this->participants->contains($participant)) {
             $this->participants->add($participant);
-            $participant->setPlayerId($this);
+            $participant->setPlayer($this);
         }
 
         return $this;
     }
 
-    public function removeParticipant(Participants $participant): static
+    public function removeParticipant(Participant $participant): static
     {
         if ($this->participants->removeElement($participant)) {
             // set the owning side to null (unless already changed)
-            if ($participant->getPlayerId() === $this) {
-                $participant->setPlayerId(null);
+            if ($participant->getPlayer() === $this) {
+                $participant->setPlayer(null);
             }
         }
 

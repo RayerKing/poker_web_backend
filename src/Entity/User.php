@@ -58,30 +58,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $email = null;
 
     #[ORM\Column]
-    private ?bool $is_aktivni = null;
+    private ?bool $isActive = null;
 
     #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
-    private ?\DateTimeImmutable $created_at = null;
+    private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
-    private ?\DateTimeImmutable $updated_at = null;
+    private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\Column]
-    private ?bool $is_deleted = null;
+    private ?bool $isDeleted = null;
 
     #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE, nullable: true)]
-    private ?\DateTimeImmutable $deleted_at = null;
+    private ?\DateTimeImmutable $deletedAt = null;
 
     #[ORM\Column]
-    private ?bool $is_demo = null;
+    private ?bool $isDemo = null;
 
-    #[ORM\OneToOne(mappedBy: 'user_id', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'user')]
     private ?Player $player = null;
 
     /**
      * @var Collection<int, Media>
      */
-    #[ORM\OneToMany(targetEntity: Media::class, mappedBy: 'user_id', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Media::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $media;
 
     public function __construct()
@@ -176,74 +176,74 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function isAktivni(): ?bool
+    public function isActive(): ?bool
     {
-        return $this->is_aktivni;
+        return $this->isActive;
     }
 
-    public function setAktivni(bool $aktivni): static
+    public function setActive(bool $active): static
     {
-        $this->is_aktivni = $aktivni;
+        $this->isActive = $active;
 
         return $this;
     }
 
     public function getCreatedAt(): ?\DateTimeImmutable
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $created_at): static
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
-        $this->created_at = $created_at;
+        $this->createdAt = $createdAt;
 
         return $this;
     }
 
     public function getUpdatedAt(): ?\DateTimeImmutable
     {
-        return $this->updated_at;
+        return $this->updatedAt;
     }
 
-    public function setUpdatedAt(\DateTimeImmutable $updated_at): static
+    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
     {
-        $this->updated_at = $updated_at;
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }
 
     public function isDeleted(): ?bool
     {
-        return $this->is_deleted;
+        return $this->isDeleted;
     }
 
-    public function setIsDeleted(bool $deleted): static
+    public function setDeleted(bool $deleted): static
     {
-        $this->is_deleted = $deleted;
+        $this->isDeleted = $deleted;
 
         return $this;
     }
 
     public function getDeletedAt(): ?\DateTimeImmutable
     {
-        return $this->deleted_at;
+        return $this->deletedAt;
     }
 
-    public function setIsDeletedAt(?\DateTimeImmutable $deleted_at): static
+    public function setDeletedAt(?\DateTimeImmutable $deletedAt): static
     {
-        $this->deleted_at = $deleted_at;
+        $this->deletedAt = $deletedAt;
 
         return $this;
     }
 
     public function isDemo(): ?bool
     {
-        return $this->is_demo;
+        return $this->isDemo;
     }
 
-    public function setIsDemo(bool $is_demo): static
+    public function setDemo(bool $isDemo): static
     {
-        $this->is_demo = $is_demo;
+        $this->isDemo = $isDemo;
 
         return $this;
     }
@@ -257,12 +257,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // unset the owning side of the relation if necessary
         if ($player === null && $this->player !== null) {
-            $this->player->setUserId(null);
+            $this->player->setUser(null);
         }
 
         // set the owning side of the relation if necessary
-        if ($player !== null && $player->getUserId() !== $this) {
-            $player->setUserId($this);
+        if ($player !== null && $player->getUser() !== $this) {
+            $player->setUser($this);
         }
 
         $this->player = $player;
@@ -282,7 +282,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->media->contains($medium)) {
             $this->media->add($medium);
-            $medium->setUserId($this);
+            $medium->setUser($this);
         }
 
         return $this;
@@ -292,8 +292,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->media->removeElement($medium)) {
             // set the owning side to null (unless already changed)
-            if ($medium->getUserId() === $this) {
-                $medium->setUserId(null);
+            if ($medium->getUser() === $this) {
+                $medium->setUser(null);
             }
         }
 
@@ -303,18 +303,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\PrePersist]
     public function onNewUser(): void
     {
-        $this->created_at = new DateTimeImmutable();
-        $this->updated_at = new DateTimeImmutable();
+        $this->createdAt = new DateTimeImmutable();
+        $this->updatedAt = new DateTimeImmutable();
 
         $this->roles = ['ROLE_USER'];
-        $this->is_aktivni = true;
-        $this->is_deleted = false;
-        $this->is_demo = false;
+        $this->isActive = true;
+        $this->isDeleted = false;
+        $this->isDemo = false;
     }
 
     #[ORM\PreUpdate]
     public function onUpdate(): void 
     {
-        $this->updated_at = new DateTimeImmutable();
+        $this->updatedAt = new DateTimeImmutable();
     }
 }

@@ -7,7 +7,9 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use DateTimeImmutable;
 
+#[ORM\HasLifecycleCallbacks]
 #[ORM\Entity(repositoryClass: TournamentRepository::class)]
 class Tournament
 {
@@ -23,45 +25,45 @@ class Tournament
     private ?\DateTimeImmutable $date = null;
 
     #[ORM\Column]
-    private ?bool $is_trophy = null;
+    private ?bool $isTrophy = null;
 
     #[ORM\Column]
-    private ?bool $is_event = null;
+    private ?bool $isEvent = null;
 
     #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE)]
-    private ?\DateTimeImmutable $created_at = null;
+    private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(type: Types::DATETIMETZ_IMMUTABLE, nullable: true)]
-    private ?\DateTimeImmutable $updated_at = null;
+    private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $text = null;
 
     #[ORM\Column(nullable: true)]
-    private ?bool $send_email = null;
+    private ?bool $sendEmail = null;
 
     #[ORM\Column]
-    private ?int $buy_in = null;
+    private ?int $buyIn = null;
 
     #[ORM\Column]
-    private ?bool $is_rebuy = null;
+    private ?bool $isRebuy = null;
 
     /**
-     * @var Collection<int, Participants>
+     * @var Collection<int, Participant>
      */
-    #[ORM\OneToMany(targetEntity: Participants::class, mappedBy: 'tournament_id', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Participant::class, mappedBy: 'tournament', orphanRemoval: true)]
     private Collection $participants;
 
     /**
      * @var Collection<int, Media>
      */
-    #[ORM\OneToMany(targetEntity: Media::class, mappedBy: 'tournament_id')]
-    private Collection $media;
+    #[ORM\OneToMany(targetEntity: Media::class, mappedBy: 'tournament')]
+    private Collection $medias;
 
     public function __construct()
     {
         $this->participants = new ArrayCollection();
-        $this->media = new ArrayCollection();
+        $this->medias = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -95,48 +97,48 @@ class Tournament
 
     public function isTrophy(): ?bool
     {
-        return $this->is_trophy;
+        return $this->isTrophy;
     }
 
-    public function setIsTrophy(bool $is_trophy): static
+    public function setTrophy(bool $trophy): static
     {
-        $this->is_trophy = $is_trophy;
+        $this->isTrophy = $trophy;
 
         return $this;
     }
 
     public function isEvent(): ?bool
     {
-        return $this->is_event;
+        return $this->isEvent;
     }
 
-    public function setIsEvent(bool $is_event): static
+    public function setEvent(bool $event): static
     {
-        $this->is_event = $is_event;
+        $this->isEvent = $event;
 
         return $this;
     }
 
     public function getCreatedAt(): ?\DateTimeImmutable
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $created_at): static
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
-        $this->created_at = $created_at;
+        $this->createdAt = $createdAt;
 
         return $this;
     }
 
     public function getUpdatedAt(): ?\DateTimeImmutable
     {
-        return $this->updated_at;
+        return $this->updatedAt;
     }
 
-    public function setUpdatedAt(?\DateTimeImmutable $updated_at): static
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
     {
-        $this->updated_at = $updated_at;
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }
@@ -155,64 +157,64 @@ class Tournament
 
     public function isSendEmail(): ?bool
     {
-        return $this->send_email;
+        return $this->sendEmail;
     }
 
-    public function setSendEmail(?bool $send_email): static
+    public function setSendEmail(?bool $sendEmail): static
     {
-        $this->send_email = $send_email;
+        $this->sendEmail = $sendEmail;
 
         return $this;
     }
 
     public function getBuyIn(): ?int
     {
-        return $this->buy_in;
+        return $this->buyIn;
     }
 
-    public function setBuyIn(int $buy_in): static
+    public function setBuyIn(int $buyIn): static
     {
-        $this->buy_in = $buy_in;
+        $this->buyIn = $buyIn;
 
         return $this;
     }
 
     public function isRebuy(): ?bool
     {
-        return $this->is_rebuy;
+        return $this->isRebuy;
     }
 
-    public function setIsRebuy(bool $is_rebuy): static
+    public function setRebuy(bool $rebuy): static
     {
-        $this->is_rebuy = $is_rebuy;
+        $this->isRebuy = $rebuy;
 
         return $this;
     }
 
     /**
-     * @return Collection<int, Participants>
+     * @return Collection<int, Participant>
      */
     public function getParticipants(): Collection
     {
         return $this->participants;
     }
 
-    public function addParticipant(Participants $participant): static
+    public function addParticipant(Participant $participant): static
     {
         if (!$this->participants->contains($participant)) {
             $this->participants->add($participant);
-            $participant->setTournamentId($this);
+            $participant->setTournament($this);
         }
 
         return $this;
     }
 
-    public function removeParticipant(Participants $participant): static
+    public function removeParticipant(Participant $participant): static
     {
         if ($this->participants->removeElement($participant)) {
             // set the owning side to null (unless already changed)
-            if ($participant->getTournamentId() === $this) {
-                $participant->setTournamentId(null);
+            if ($participant->getTournament() === $this) {
+                $participant->setTournament(null);
             }
         }
 
@@ -224,14 +226,14 @@ class Tournament
      */
     public function getMedia(): Collection
     {
-        return $this->media;
+        return $this->medias;
     }
 
     public function addMedium(Media $medium): static
     {
-        if (!$this->media->contains($medium)) {
-            $this->media->add($medium);
-            $medium->setTournamentId($this);
+        if (!$this->medias->contains($medium)) {
+            $this->medias->add($medium);
+            $medium->setTournament($this);
         }
 
         return $this;
@@ -239,13 +241,26 @@ class Tournament
 
     public function removeMedium(Media $medium): static
     {
-        if ($this->media->removeElement($medium)) {
+        if ($this->medias->removeElement($medium)) {
             // set the owning side to null (unless already changed)
-            if ($medium->getTournamentId() === $this) {
-                $medium->setTournamentId(null);
+            if ($medium->getTournament() === $this) {
+                $medium->setTournament(null);
             }
         }
 
         return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function onNewTournament(): void
+    {
+        $this->createdAt = new DateTimeImmutable();
+        $this->updatedAt = new DateTimeImmutable();
+    }
+
+    #[ORM\PreUpdate]
+    public function onUpdate(): void 
+    {
+        $this->updatedAt = new DateTimeImmutable();
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum ParticipantsStar: string
+enum ParticipantStar: string
 {
     case TERRIBLE = '0';
     case AWFUL = '0.5';
