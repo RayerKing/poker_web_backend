@@ -79,4 +79,8 @@ migrate-down-test:
 unit:
 	@php bin/phpunit
 
+.PHONY: docs
+docs:
+	@docker exec $(DOCKER_NAME) php bin/console api:openapi:export > openapi.json
+
 
